@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Board {
-    pub n: usize,
+    pub size: usize,
     pub grid: Vec<bool>,
     pub queens: HashMap<Point, String>,
     pub free_rows: HashMap<usize, usize>,
@@ -30,7 +30,7 @@ impl Board {
         let queens = HashMap::new();
 
         Board {
-            n,
+            size: n,
             grid,
             queens,
             free_rows,
@@ -46,16 +46,18 @@ impl Board {
     pub fn to_string(board: &Board) -> String {
         let mut s = String::new();
 
-        for (index, val) in board.grid.iter().enumerate() {
-            let i = index + 1;
-            if val == &true && ((i % board.n) == 0) {
-                s.push_str("🟥\n");
-            } else if val == &false && ((i % board.n) == 0) {
-                s.push_str("⬛\n");
-            } else if val == &true {
+        for (index, value) in board.grid.iter().enumerate() {
+            let has_queen = *value;
+            let at_edge = ((index + 1) % board.size) == 0;
+
+            if has_queen {
                 s.push('🟥');
-            } else if val == &false {
+            } else {
                 s.push('⬛');
+            }
+
+            if at_edge {
+                s.push('\n');
             }
         }
 
@@ -66,7 +68,7 @@ impl Board {
         Point {
             col,
             row,
-            n: self.n,
+            n: self.size,
         }
     }
 
@@ -76,7 +78,7 @@ impl Board {
         let p1 = Point {
             col: p.col,
             row: p.row,
-            n: self.n,
+            n: self.size,
         };
 
         self.queens.insert(p1, String::new());
