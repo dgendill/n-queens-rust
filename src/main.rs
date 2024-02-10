@@ -3,49 +3,73 @@ mod point;
 use crate::board::*;
 
 fn main() {
-    let board = Board::new(8);
+    let a: Vec<usize> = (0..8).collect();
+    let mut solution_count = 0;
 
-    let board = solve_n_queens_f(board, Some((3, 0)));
-    match board {
-        Some(x) => {
-            println!("{}", x);
-        }
-        None => {
-            println!("No solution");
+    for x in &a {
+        for y in &a {
+            let mut board = Board::new(8);
+
+            board.set_queen_at(&point::Point {
+                col: *x,
+                row: *y,
+                n: 8,
+            });
+
+            let original_board_str = Board::to_string(&board);
+            let solution = solve_n_queens_f(board, Some((*x, *y)));
+
+            match solution {
+                Some(x) => {
+                    solution_count += 1;
+                    println!("Start: ");
+                    println!("{}", original_board_str);
+                    println!("Solution: ");
+                    println!("{}", x);
+                    println!("\n----------\n")
+                }
+                None => {
+                    println!("Start: ");
+                    println!("{}", original_board_str);
+                    println!("No solution");
+                    println!("\n----------\n")
+                }
+            }
         }
     }
+
+    println!("Solution Count: {}", solution_count);
 }
+
+// println!("\n\n{}", Board::to_string(&result.1));
+// std::thread::sleep(std::time::Duration::from_millis(1));
 
 fn level(col: usize, queen_count: usize, board: Board) -> (bool, Board) {
     let mut result = (false, board);
 
-    if result.1.n == 1 && result.1.col_has_queen(col) {
+    if result.1.size == 1 && result.1.col_has_queen(col) {
         result = (true, result.1);
     } else if result.1.col_has_queen(col) {
         result = level(col + 1, queen_count, result.1);
     } else {
-        let free_rows = result.1.free_rows.clone();
+        let rows: Vec<usize> = (1..result.1.size).collect();
 
-        for r in free_rows {
-            let row = r.1;
+        for row in rows {
+            if result.1.taken_rows.contains(&row) {
+                continue;
+            }
 
             let p = result.1.position(col, row);
             let ok = !result.1.under_attack_queen(&p);
 
             if ok {
-                // println!("\n\n{}", Board::to_string(&result.1));
-                // std::thread::sleep(std::time::Duration::from_millis(1));
-
                 result.1.set_queen_at(&result.1.position(col, row));
 
-                // println!("\n\n{}", Board::to_string(&result.1));
-                // std::thread::sleep(std::time::Duration::from_millis(1));
-
-                if queen_count + 1 == result.1.n {
+                if queen_count + 1 == result.1.size {
                     result.0 = true;
                     break;
                 } else {
-                    if col == result.1.n - 1 {
+                    if col == result.1.size - 1 {
                         break;
                     }
 
@@ -57,10 +81,6 @@ fn level(col: usize, queen_count: usize, board: Board) -> (bool, Board) {
                         }
                         false => {
                             result.1.clear_at(&result.1.position(col, row));
-
-                            // println!("\n\n{}", Board::to_string(&result.1));
-                            // std::thread::sleep(std::time::Duration::from_millis(40));
-
                             continue;
                         }
                     }

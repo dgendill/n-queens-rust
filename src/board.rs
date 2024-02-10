@@ -1,15 +1,15 @@
 // mod point;
 
 use super::point::Point;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
 pub struct Board {
     pub size: usize,
     pub grid: Vec<bool>,
     pub queens: HashMap<Point, String>,
-    pub free_rows: HashMap<usize, usize>,
-    pub free_cols: HashMap<usize, usize>,
+    pub taken_rows: HashSet<usize>,
+    pub taken_cols: HashSet<usize>,
 }
 
 impl Board {
@@ -18,23 +18,16 @@ impl Board {
         let length = n * n;
         let grid = vec![false; length];
 
-        let mut free_rows = HashMap::new();
-        for n in 0..n {
-            free_rows.insert(n, n);
-        }
-        let mut free_cols = HashMap::new();
-        for n in 0..n {
-            free_cols.insert(n, n);
-        }
-
+        let mut taken_rows = HashSet::new();
+        let mut taken_cols = HashSet::new();
         let queens = HashMap::new();
 
         Board {
             size: n,
             grid,
             queens,
-            free_rows,
-            free_cols,
+            taken_rows,
+            taken_cols,
         }
     }
 
@@ -82,24 +75,24 @@ impl Board {
         };
 
         self.queens.insert(p1, String::new());
-        self.free_rows.remove(&p.row);
-        self.free_cols.remove(&p.col);
+        self.taken_rows.insert(p.row);
+        self.taken_cols.insert(p.col);
     }
 
     #[allow(dead_code)]
     pub fn row_has_queen(&self, row: usize) -> bool {
-        !self.free_rows.contains_key(&row)
+        self.taken_rows.contains(&row)
     }
 
     pub fn clear_at(&mut self, p: &Point) {
         self.grid[p.index()] = false;
         self.queens.remove(p);
-        self.free_rows.insert(p.row, p.row);
-        self.free_cols.insert(p.col, p.col);
+        self.taken_rows.remove(&p.row);
+        self.taken_cols.remove(&p.col);
     }
 
     pub fn col_has_queen(&self, col: usize) -> bool {
-        !self.free_cols.contains_key(&col)
+        self.taken_cols.contains(&col)
     }
 
     pub fn under_attack_queen(&self, intersection: &Point) -> bool {
