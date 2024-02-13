@@ -18,6 +18,7 @@ fn main() {
 
             let original_board_str = Board::to_string(&board);
             let solution = solve_n_queens_f(board, Some((*x, *y)));
+            // let solution = solve_n_queens_f(board, None);
 
             match solution {
                 Some(x) => {
@@ -29,10 +30,10 @@ fn main() {
                     println!("\n----------\n")
                 }
                 None => {
-                    println!("Start: ");
-                    println!("{}", original_board_str);
-                    println!("No solution");
-                    println!("\n----------\n")
+                    // println!("Start: ");
+                    // println!("{}", original_board_str);
+                    // println!("No solution");
+                    // println!("\n----------\n")
                 }
             }
         }
@@ -52,20 +53,30 @@ fn level(col: usize, queen_count: usize, board: Board) -> (bool, Board) {
     } else if result.1.col_has_queen(col) {
         result = level(col + 1, queen_count, result.1);
     } else {
-        let rows: Vec<usize> = (1..result.1.size).collect();
+        let rows: Vec<usize> = (0..result.1.size).collect();
 
         for row in rows {
             if result.1.taken_rows.contains(&row) {
                 continue;
             }
 
-            let p = result.1.position(col, row);
-            let ok = !result.1.under_attack_queen(&p);
+            let proposed_position = result.1.position(col, row);
+            let ok = !result.1.under_attack_queen(&proposed_position);
 
             if ok {
-                result.1.set_queen_at(&result.1.position(col, row));
+                result.1.set_queen_at(&proposed_position);
+
+                // println!("\n\n{}", Board::to_string(&result.1));
+                // println!(
+                //     "qc{} s{} pp{}\n",
+                //     queen_count + 1,
+                //     result.1.size,
+                //     &proposed_position
+                // );
+                // std::thread::sleep(std::time::Duration::from_millis(500));
 
                 if queen_count + 1 == result.1.size {
+                    // Found Solution
                     result.0 = true;
                     break;
                 } else {

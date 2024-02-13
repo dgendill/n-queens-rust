@@ -149,6 +149,22 @@ mod tests {
     }
 
     #[test]
+    fn test_set_queen() {
+        let mut board = Board::new(8);
+        let p1 = board.position(0, 0);
+        let p3 = board.position(7, 7);
+
+        board.set_queen_at(&p1);
+        board.set_queen_at(&p3);
+
+        let qat = board.has_queen_at(&p1);
+        assert!(qat, "There is a queen at {:?}", p1);
+
+        let qat = board.has_queen_at(&p3);
+        assert!(qat, "There is a queen at {:?}", p3);
+    }
+
+    #[test]
     fn test_row_and_col_checks() {
         let mut board = Board::new(10);
         let p1 = board.position(0, 0);
@@ -185,5 +201,45 @@ mod tests {
         assert!(qat, "Col 0 does have a queen");
         let qat = board2.row_has_queen(0);
         assert!(qat, "Row 0 does have a queen");
+    }
+
+    #[test]
+    fn test_under_attack_queen() {
+        let mut board = Board::new(10);
+        let p1 = board.position(0, 0);
+        let p2 = board.position(2, 2);
+        let p3 = board.position(0, 2);
+        let p4 = board.position(2, 0);
+
+        let p5 = board.position(2, 1);
+
+        board.set_queen_at(&p1);
+        assert!(
+            board.under_attack_queen(&p2),
+            "{} should be threatening {}",
+            p1,
+            p2
+        );
+
+        assert!(
+            board.under_attack_queen(&p3),
+            "{} should be threatening {}",
+            p1,
+            p3
+        );
+
+        assert!(
+            board.under_attack_queen(&p4),
+            "{} should be threatening {}",
+            p1,
+            p4
+        );
+
+        assert!(
+            !board.under_attack_queen(&p5),
+            "{} should not threaten {}",
+            p1,
+            p5
+        );
     }
 }
