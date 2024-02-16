@@ -3,13 +3,13 @@
 use super::point::Point;
 use std::collections::{HashMap, HashSet};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Board {
     pub size: usize,
-    pub grid: Vec<bool>,
-    pub queens: HashMap<Point, String>,
-    pub taken_rows: HashSet<usize>,
-    pub taken_cols: HashSet<usize>,
+    grid: Vec<bool>,
+    queens: HashMap<Point, String>,
+    taken_rows: HashSet<usize>,
+    taken_cols: HashSet<usize>,
 }
 
 impl Board {
@@ -18,8 +18,8 @@ impl Board {
         let length = n * n;
         let grid = vec![false; length];
 
-        let mut taken_rows = HashSet::new();
-        let mut taken_cols = HashSet::new();
+        let taken_rows = HashSet::new();
+        let taken_cols = HashSet::new();
         let queens = HashMap::new();
 
         Board {
@@ -29,6 +29,10 @@ impl Board {
             taken_rows,
             taken_cols,
         }
+    }
+
+    pub fn has_taken_row(&self, row: usize) -> bool {
+        self.taken_rows.contains(&row)
     }
 
     #[allow(dead_code)]
@@ -116,6 +120,26 @@ impl Board {
         }
 
         yes
+    }
+
+    pub fn rotate90(&self) -> Board {
+        let mut new_board = Board::new(self.size);
+
+        for point in self.queens.keys() {
+            new_board.set_queen_at(&point.rotate90());
+        }
+
+        new_board
+    }
+
+    pub fn mirror(&self) -> Board {
+        let mut new_board = Board::new(self.size);
+
+        for point in self.queens.keys() {
+            new_board.set_queen_at(&point.mirror_x());
+        }
+
+        new_board
     }
 }
 

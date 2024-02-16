@@ -1,10 +1,12 @@
 mod board;
 mod point;
+use std::collections::HashSet;
+
 use crate::board::*;
 
 fn main() {
     let a: Vec<usize> = (0..8).collect();
-    let mut solution_count = 0;
+    let mut unique_solutions: HashSet<String> = HashSet::new();
 
     for x in &a {
         for y in &a {
@@ -16,30 +18,39 @@ fn main() {
                 n: 8,
             });
 
-            let original_board_str = Board::to_string(&board);
-            let solution = solve_n_queens_f(board, Some((*x, *y)));
-            // let solution = solve_n_queens_f(board, None);
+            // let original_board_str = Board::to_string(&board);
+            if let Some(solved_board) = solve_n_queens_f(board, Some((*x, *y))) {
+                let rot90 = solved_board.rotate90();
+                let rot180 = rot90.rotate90();
+                let rot270 = rot180.rotate90();
+                let m = solved_board.mirror();
+                let m_rot90 = rot90.mirror();
+                let m_rot180 = rot180.mirror();
+                let m_rot270 = rot270.mirror();
 
-            match solution {
-                Some(x) => {
-                    solution_count += 1;
-                    println!("Start: ");
-                    println!("{}", original_board_str);
-                    println!("Solution: ");
-                    println!("{}", x);
-                    println!("\n----------\n")
-                }
-                None => {
-                    // println!("Start: ");
-                    // println!("{}", original_board_str);
-                    // println!("No solution");
-                    // println!("\n----------\n")
+                for s in vec![
+                    solved_board,
+                    rot90,
+                    rot180,
+                    rot270,
+                    m,
+                    m_rot90,
+                    m_rot180,
+                    m_rot270,
+                ] {
+                    let solution = Board::to_string(&s);
+                    if unique_solutions.get(&solution).is_none() {
+                        unique_solutions.insert(solution.clone());
+                        println!("Solution: ");
+                        println!("{}", solution);
+                        println!("\n----------\n");
+                    }
                 }
             }
         }
     }
 
-    println!("Solution Count: {}", solution_count);
+    println!("Solution Count: {}", unique_solutions.len());
 }
 
 // println!("\n\n{}", Board::to_string(&result.1));
@@ -56,7 +67,7 @@ fn level(col: usize, queen_count: usize, board: Board) -> (bool, Board) {
         let rows: Vec<usize> = (0..result.1.size).collect();
 
         for row in rows {
-            if result.1.taken_rows.contains(&row) {
+            if result.1.has_taken_row(row) {
                 continue;
             }
 
@@ -65,15 +76,6 @@ fn level(col: usize, queen_count: usize, board: Board) -> (bool, Board) {
 
             if ok {
                 result.1.set_queen_at(&proposed_position);
-
-                // println!("\n\n{}", Board::to_string(&result.1));
-                // println!(
-                //     "qc{} s{} pp{}\n",
-                //     queen_count + 1,
-                //     result.1.size,
-                //     &proposed_position
-                // );
-                // std::thread::sleep(std::time::Duration::from_millis(500));
 
                 if queen_count + 1 == result.1.size {
                     // Found Solution
@@ -105,16 +107,11 @@ fn level(col: usize, queen_count: usize, board: Board) -> (bool, Board) {
     result
 }
 
-pub fn solve_n_queens(n: usize, mandatory_coords: (usize, usize)) -> Option<String> {
-    let board = Board::new(n);
-    solve_n_queens_f(board, Some(mandatory_coords))
-}
-
 /// Given an n x n board attempt to put n queens on the board so
 /// they do not threaten each other. If the position of one queen
 /// is given, then attempt to find the solution for the remaining
 /// n-1 queens
-fn solve_n_queens_f(mut board: Board, queen_coords: Option<(usize, usize)>) -> Option<String> {
+fn solve_n_queens_f(mut board: Board, queen_coords: Option<(usize, usize)>) -> Option<Board> {
     let mut queen_count = 0;
 
     if let Some(x) = queen_coords {
@@ -125,7 +122,7 @@ fn solve_n_queens_f(mut board: Board, queen_coords: Option<(usize, usize)>) -> O
 
     let (ok, board) = level(0, queen_count, board);
     match ok {
-        true => Some(Board::to_string(&board)),
+        true => Some(board.clone()),
         false => None,
     }
 }

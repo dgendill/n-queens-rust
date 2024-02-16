@@ -1,6 +1,6 @@
-use std::{f64::consts::PI, fmt};
+use std::fmt;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Point {
     /// The zero-index column position
     pub col: usize,
@@ -26,34 +26,25 @@ impl Point {
 
     /// Rotate 90 degress clockwise
     pub fn rotate90(&self) -> Point {
-        let radians = 90.0_f64.to_radians(); //  * PI / 180.0;
-        let t: f64 = radians;
-        let sin = t.sin();
-        let cos = t.cos();
+        // column becomes row. new row = column
+        // row becomes column. new column = n - row
 
-        let x: f64 = self.col as f64;
-        let y: f64 = self.row as f64;
-
-        // let new_col = (cos * x + sin * y).round();
-        // let new_row = ((-sin) * x + cos * y).round();
-        let mut new_col = (cos * x - sin * y);
-        let mut new_row = (sin * x + cos * y);
-
-        println!("{} {} {}", radians, new_col, new_row);
-
-        if new_col <= 0.0 {
-            new_col += (self.n as f64) - 1.0;
-        }
-
-        if new_row <= 0.0 {
-            new_row += (self.n as f64) - 1.0;
-        }
-
-        println!("{} {} {}", radians, new_col, new_row);
+        let new_row = self.col;
+        let new_col = self.n - 1 - self.row;
 
         Point {
-            col: new_col as usize,
-            row: new_row as usize,
+            col: new_col,
+            row: new_row,
+            n: self.n,
+        }
+    }
+
+    pub fn mirror_x(&self) -> Point {
+        let new_row = self.row;
+        let new_col = (self.col as i8 - self.n as i8 + 1).abs() as usize;
+        Point {
+            col: new_col,
+            row: new_row,
             n: self.n,
         }
     }
@@ -72,10 +63,12 @@ impl fmt::Display for Point {
 
 #[test]
 fn test_point_rotation() {
-    // let mapping = vec![((1, 1), (6, 1)), ((0, 0), (7, 0)), ((7, 0), (7, 7)), ((7,7),(0,7))];
-    // let mapping = vec![((1, 1), (6, 1))];
-    let mapping = vec![((0, 0), (7, 0))];
-    // let mapping = vec![((7, 0), (7, 7))];
+    let mapping = vec![
+        ((1, 1), (6, 1)),
+        ((0, 0), (7, 0)),
+        ((7, 0), (7, 7)),
+        ((7, 7), (0, 7)),
+    ];
 
     for map in mapping {
         let from = map.0;
@@ -96,6 +89,45 @@ fn test_point_rotation() {
                 col: to.0,
                 row: to.1,
                 n: 8
+            },
+            p2
+        )
+    }
+}
+
+#[test]
+fn test_mirror() {
+    let mapping = vec![
+        ((0, 0), (2, 0)),
+        ((0, 1), (2, 1)),
+        ((0, 2), (2, 2)),
+        ((1, 0), (1, 0)),
+        ((1, 1), (1, 1)),
+        ((1, 2), (1, 2)),
+        ((2, 0), (0, 0)),
+        ((2, 1), (0, 1)),
+        ((2, 2), (0, 2)),
+    ];
+
+    for map in mapping {
+        let from = map.0;
+        let to = map.1;
+
+        let p1 = Point {
+            col: from.0,
+            row: from.1,
+            n: 3,
+        };
+
+        let p2 = p1.mirror_x();
+
+        println!("{} to {}", p1, p2);
+
+        assert_eq!(
+            Point {
+                col: to.0,
+                row: to.1,
+                n: 3
             },
             p2
         )
