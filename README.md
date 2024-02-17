@@ -1,6 +1,6 @@
 # N-Queens Problem Rust
 
-A rust solver to find all 92 solutions of the N-Queens problem.
+A rust solver to find all 92 solutions of the 8x8 N-Queens problem.
 
 To see all [92 distinct solutions](https://en.wikipedia.org/wiki/Eight_queens_puzzle#Constructing_and_counting_solutions_when_n_=_8) you exececute `cargo run` in the project root, or just look at the list below.
 
