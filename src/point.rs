@@ -41,7 +41,7 @@ impl Point {
 
     pub fn mirror_x(&self) -> Point {
         let new_row = self.row;
-        let new_col = (self.col as i8 - self.n as i8 + 1).abs() as usize;
+        let new_col = (self.col as i8 - self.n as i8 + 1).unsigned_abs() as usize;
         Point {
             col: new_col,
             row: new_row,

@@ -31,8 +31,8 @@ impl Board {
         }
     }
 
-    pub fn has_taken_row(&self, row: usize) -> bool {
-        self.taken_rows.contains(&row)
+    pub fn queen_count(&self) -> usize {
+        self.queens.len()
     }
 
     #[allow(dead_code)]
@@ -95,6 +95,7 @@ impl Board {
         self.taken_cols.remove(&p.col);
     }
 
+    #[allow(dead_code)]
     pub fn col_has_queen(&self, col: usize) -> bool {
         self.taken_cols.contains(&col)
     }
